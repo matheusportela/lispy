@@ -11,6 +11,7 @@ class Lispy:
     def __init__(self):
         # REPL stuff
         self.prompt = '>>> '
+        self.welcome_message = ''
         self.farewell_message = 'bye!'
 
         # Interpreter stuff
@@ -24,6 +25,8 @@ class Lispy:
         return self.interpreter.execute(instruction)
 
     def repl(self):
+        print(self.welcome_message)
+
         try:
             while True:
                 string = input(self.prompt)
@@ -71,7 +74,7 @@ class Parser:
                 'parser': lambda t: None
             },
             'int': {
-                'regex': r'^(\d+)$',
+                'regex': r'^(-?\d+)$',
                 'parser': int
             },
             'float': {

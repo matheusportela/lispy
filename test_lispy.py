@@ -33,6 +33,18 @@ class TestParser(unittest.TestCase):
     def setUp(self):
         self.parser = lispy.Parser()
 
+    def assert_none(self, value):
+        self.assertEqual(value.__class__.__name__, 'NoneType')
+
+    def assert_int(self, value):
+        self.assertEqual(type(value), int)
+
+    def assert_float(self, value):
+        self.assertEqual(type(value), float)
+    
+    def assert_str(self, value):
+        self.assertEqual(type(value), str)
+    
     def test_empty_list(self):
         self.assertEqual(self.parser.parse([]), [])
 
@@ -40,28 +52,44 @@ class TestParser(unittest.TestCase):
         self.assertEqual(self.parser.parse(['nil']), ['nil'])
 
     def test_nil_as_none(self):
-        self.assertEqual(self.parser.parse(['quote', 'nil']), ['quote', None])
+        result = self.parser.parse(['quote', 'nil'])[1] 
+        self.assertEqual(result, None)
+        self.assert_none(result)
 
     def test_1_as_int(self):
-        self.assertEqual(self.parser.parse(['quote', '1']), ['quote', 1])
+        result = self.parser.parse(['quote', '1'])[1]
+        self.assertEqual(result, 1)
+        self.assert_int(result)
 
     def test_negative_1_as_int(self):
-        self.assertEqual(self.parser.parse(['quote', '-1']), ['quote', -1])
+        result = self.parser.parse(['quote', '-1'])[1]
+        self.assertEqual(result, -1)
+        self.assert_int(result)
 
     def test_1_1_as_float(self):
-        self.assertEqual(self.parser.parse(['quote', '1.1']), ['quote', 1.1])
+        result = self.parser.parse(['quote', '1.1'])[1]
+        self.assertEqual(result, 1.1)
+        self.assert_float(result)
 
     def test_0_1_as_float(self):
-        self.assertEqual(self.parser.parse(['quote', '.1']), ['quote', 0.1])
-
+        result = self.parser.parse(['quote', '.1'])[1]
+        self.assertEqual(result, 0.1)
+        self.assert_float(result)
+    
     def test_negative_1_1_as_float(self):
-        self.assertEqual(self.parser.parse(['quote', '-1.1']), ['quote', -1.1])
+        result = self.parser.parse(['quote', '-1.1'])[1]
+        self.assertEqual(result, -1.1)
+        self.assert_float(result)
 
     def test_a_as_str(self):
-        self.assertEqual(self.parser.parse(['quote', "'a'"]), ['quote', 'a'])
+        result = self.parser.parse(['quote', "'a'"])[1]
+        self.assertEqual(result, 'a')
+        self.assert_str(result)
 
     def test_abc_as_str(self):
-        self.assertEqual(self.parser.parse(['quote', "'abc'"]), ['quote', 'abc'])
+        result = self.parser.parse(['quote', "'abc'"])[1]
+        self.assertEqual(result, 'abc')
+        self.assert_str(result)
 
 
 class TestInterpreter(unittest.TestCase):
