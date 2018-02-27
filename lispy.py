@@ -147,6 +147,9 @@ class Parser:
         if not tokens:
             return []
 
+        if tokens[0] == 'quote':
+            return tokens
+
         result = [tokens[0]]
 
         for token in tokens[1:]:
@@ -174,29 +177,46 @@ class Interpreter:
 
     def __init__(self):
         self.functions = {
-            'quote': lambda args: args,
-            '+': sum,
-            'sum': sum,
+            'quote': self._quote,
+            '+': self._sum,
+            'sum': self._sum,
         }
+        self.variableS = {}
 
     def execute(self, instruction):
         if not instruction:
             return None
 
         function_name = instruction[0]
-        args = []
-        
-        for arg in instruction[1:]:
-            if type(arg) == list:
-                arg = self.execute(arg)
-            
-            args.append(arg)
+        args = instruction[1:]
+
+        if function_name != 'quote':
+            args = self._evaluate_args(args)
 
         if function_name in self.functions:
             function = self.functions[function_name]
-            return function(args)
+            return function(*args)
 
         raise self.UnknownFunctionError('Unknown function "{}"'.format(function_name))
+    
+    def _evaluate_args(self, args):
+        result = []
+        
+        for arg in args:
+            if type(arg) == list:
+                arg = self.execute(arg)
+        
+            result.append(arg)
+
+        return result
+
+
+    def _quote(self, arg):
+        return arg
+
+    def _sum(self, *args):
+        return sum(args)
+
 
 if __name__ == '__main__':
     print('lispy v{}'.format(__version__))
