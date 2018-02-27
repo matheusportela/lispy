@@ -10,28 +10,49 @@ class TestLispy(unittest.TestCase):
     def test_function_execution(self):
         self.assertEqual(lispy.eval('(+ 1 2 3)'), 6)
 
+    def test_function_execution_with_nested_lists(self):
+        self.assertEqual(lispy.eval('(+ 1 2 (+ 3 4 5) (+ 6 7 8))'), 36)
+
 
 class TestLexer(unittest.TestCase):
     def setUp(self):
         self.lexer = lispy.Lexer()
 
-    def test_empty_list(self):
+    def test_tokenize_with_empty_string(self):
+        self.assertEqual(self.lexer.tokenize(''), [])
+    
+    def test_tokenize_with_single_word(self):
+        self.assertEqual(self.lexer.tokenize('abc'), ['abc'])
+
+    def test_tokenize_returns_all_words(self):
+        self.assertEqual(self.lexer.tokenize('abc def'), ['abc', 'def'])
+
+    def test_tokenize_with_opening_parenthesis(self):
+        self.assertEqual(self.lexer.tokenize('abc)def'), ['abc'])
+    
+    def test_tokenize_with_closing_parenthesis(self):
+        self.assertEqual(self.lexer.tokenize('abc(def'), ['abc'])
+    
+    def test_tokenize_with_empty_list(self):
         self.assertEqual(self.lexer.tokenize('()'), [])
 
-    def test_list_with_one_element(self):
+    def test_tokenize_list_with_one_element(self):
         self.assertEqual(self.lexer.tokenize('(nil)'), ['nil'])
 
-    def test_list_with_two_elements(self):
+    def test_tokenize_list_with_two_elements(self):
         self.assertEqual(self.lexer.tokenize('(1 2)'), ['1', '2'])
+
+    def test_nested_lists(self):
+        self.assertEqual(self.lexer.tokenize('((1 2) ((3 4) 5 6))'), [['1', '2'], [['3', '4'], '5', '6']])
 
     def test_raises_error_on_unbalanced_parentheses(self):
         with self.assertRaises(lispy.Lexer.InvalidInputError):
-            self.lexer.tokenize('( 1')
+            self.lexer.tokenize('(1')
 
 
 class TestParser(unittest.TestCase):
     def setUp(self):
-        self.parser = lispy.Parser()
+     self.parser = lispy.Parser()
 
     def assert_none(self, value):
         self.assertEqual(value.__class__.__name__, 'NoneType')
@@ -91,6 +112,19 @@ class TestParser(unittest.TestCase):
         self.assertEqual(result, 'abc')
         self.assert_str(result)
 
+    def test_nested_lists(self):
+        result = self.parser.parse(['quote', 'nil', ['quote', ['quote', '2', '3.0'], "'abc'"]])
+        
+        self.assertEqual(result[1], None)
+        self.assertEqual(result[2][1][1], 2)
+        self.assertEqual(result[2][1][2], 3.0)
+        self.assertEqual(result[2][2], 'abc')
+
+        self.assert_none(result[1])
+        self.assert_int(result[2][1][1])
+        self.assert_float(result[2][1][2])
+        self.assert_str(result[2][2])
+
 
 class TestInterpreter(unittest.TestCase):
     def setUp(self):
@@ -111,6 +145,9 @@ class TestInterpreter(unittest.TestCase):
 
     def test_quote_return_same_list(self):
         self.assertEqual(self.interpreter.execute(['quote', 1, 2, 3]), [1, 2, 3])
+    
+    def test_quote_with_nested_lists(self):
+        self.assertEqual(self.interpreter.execute(['quote', 1, 2, ['quote', 3, 4, 5], 6]), [1, 2, [3, 4, 5], 6])
 
 
 if __name__ == '__main__':

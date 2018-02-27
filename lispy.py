@@ -10,12 +10,12 @@ class Lispy:
     class LispyError(BaseException): pass
 
     def __init__(self):
-        # REPL stuff
+        # REPL attributes 
         self.prompt = '>>> '
         self.welcome_message = ''
         self.farewell_message = 'bye!'
 
-        # Interpreter stuff
+        # Interpreter attributes
         self.lexer = Lexer()
         self.parser = Parser()
         self.interpreter = Interpreter()
@@ -34,41 +34,89 @@ class Lispy:
             try:
                 string = input(self.prompt)
                 output = self.eval(string)
-                self._print(output)
-            except (KeyboardInterrupt, EOFError):
-                break
+                print(self._format_output(output))
             except self.LispyError as e:
                 print('ERROR: {}'.format(str(e)))
+            except (KeyboardInterrupt, EOFError):
+                break
         
         print('\n{}'.format(self.farewell_message))
     
-    def _print(self, output):
+    def _format_output(self, output):
         string = ''
         
         if type(output) == list:
             string += '('
-            string += ' '.join([str(o) for o in output]) 
+            string += ' '.join([str(self._format_output(o)) if type(o) == list else str(o) for o in output]) 
             string += ')'
         else:
             string = str(output)
 
-        print(string)
+        return string
 
 
 class Lexer:
     class InvalidInputError(Lispy.LispyError): pass
 
     def tokenize(self, string):
-        regex = '^\((.*)\)$'
-        result = re.match(regex, string)
-
-        if result:
-            token = result.group(1)
-            if token:
-                return token.split(' ')
+        if not string:
             return []
+        elif string[0] == '(':
+            return self.tokenize_list(list(string))
+        else:
+            return self.tokenize_words(list(string))
+
+    def tokenize_list(self, chars):
+        result = []
+        char = chars.pop(0) # ignore first '('
+
+        while chars:
+            char = chars.pop(0)
+            
+            if char == ')':
+                return result
+            elif char == '(':
+                chars.insert(0, char)
+                result.append(self.tokenize_list(chars))
+            else:
+                chars.insert(0, char)
+                result += self.tokenize_words(chars)
         
-        raise self.InvalidInputError('Invalid input "{}"'.format(string))
+        raise self.InvalidInputError('Invalid input "{}"'.format(''.join(chars)))
+
+    def tokenize_words(self, chars):
+        words_delimiters = '()'
+        words_ignores = ' '
+        result = []
+
+        while chars:
+            char = chars.pop(0)
+
+            if char in words_delimiters:
+                chars.insert(0, char)
+                break
+            elif char in words_ignores:
+                continue
+            else:
+                chars.insert(0, char)
+                result.append(self.tokenize_word(chars))
+
+        return result
+
+    def tokenize_word(self, chars):
+        word_delimiters = ' ()'
+        result = []
+
+        while chars:
+            char = chars.pop(0)
+
+            if char in word_delimiters:
+                chars.insert(0, char)
+                break
+            else:
+                result.append(char)
+
+        return ''.join(result)
 
 
 class Parser:
@@ -99,9 +147,15 @@ class Parser:
         if not tokens:
             return []
 
-        symbol = tokens[0]
-        args = [self._parse_token(token) for token in tokens[1:]]
-        return [symbol] + args
+        result = [tokens[0]]
+
+        for token in tokens[1:]:
+            if type(token) == list:
+                result.append(self.parse(token))
+            else:
+                result.append(self._parse_token(token))
+
+        return result 
 
     def _parse_token(self, token):
         for type in self.types:
@@ -122,6 +176,7 @@ class Interpreter:
         self.functions = {
             'quote': lambda args: args,
             '+': sum,
+            'sum': sum,
         }
 
     def execute(self, instruction):
@@ -129,10 +184,17 @@ class Interpreter:
             return None
 
         function_name = instruction[0]
+        args = []
+        
+        for arg in instruction[1:]:
+            if type(arg) == list:
+                arg = self.execute(arg)
+            
+            args.append(arg)
 
         if function_name in self.functions:
             function = self.functions[function_name]
-            return function(instruction[1:])
+            return function(args)
 
         raise self.UnknownFunctionError('Unknown function "{}"'.format(function_name))
 
