@@ -10,21 +10,6 @@ class TestLispy(unittest.TestCase):
     def test_function_execution(self):
         self.assertEqual(lispy.eval('(+ 1 2 3)'), 6)
 
-    #def test_list_with_nil(self):
-    #    self.assertEqual(lispy.eval('(nil)'), [None])
-
-    #def test_list_with_int(self):
-    #    self.assertEqual(lispy.eval('(1)'), [1])
-
-    #def test_list_with_float(self):
-    #    self.assertEqual(lispy.eval('(1.0)'), [1.0])
-    
-    #def test_list_with_str(self):
-    #    self.assertEqual(lispy.eval("('abc')"), ['abc'])
-    
-    #def test_list_with_multiple_types(self):
-    #    self.assertEqual(lispy.eval("(1 2.0 'abc' nil)"), [1, 2.0, 'abc', None])
-
 
 class TestLexer(unittest.TestCase):
     def setUp(self):
