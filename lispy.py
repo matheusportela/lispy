@@ -10,7 +10,7 @@ class Lispy:
     class LispyError(BaseException): pass
 
     def __init__(self):
-        # REPL attributes 
+        # REPL attributes
         self.prompt = '>>> '
         self.welcome_message = ''
         self.farewell_message = 'bye!'
@@ -39,12 +39,12 @@ class Lispy:
                 print('ERROR: {}'.format(str(e)))
             except (KeyboardInterrupt, EOFError):
                 break
-        
+
         print('\n{}'.format(self.farewell_message))
-    
+
     def _format_output(self, output):
         string = ''
-        
+
         if type(output) == list:
             string += '('
             result = []
@@ -55,7 +55,7 @@ class Lispy:
                     result.append('nil')
                 else:
                     result.append(str(o))
-            string += ' '.join(result) 
+            string += ' '.join(result)
             string += ')'
         elif output == None:
             string = 'nil'
@@ -82,7 +82,7 @@ class Lexer:
 
         while chars:
             char = chars.pop(0)
-            
+
             if char == ')':
                 return result
             elif char == '(':
@@ -91,7 +91,7 @@ class Lexer:
             else:
                 chars.insert(0, char)
                 result += self.tokenize_words(chars)
-        
+
         raise self.InvalidInputError('Invalid input "{}"'.format(''.join(chars)))
 
     def tokenize_words(self, chars):
@@ -168,7 +168,7 @@ class Parser:
             else:
                 result.append(self._parse_token(token))
 
-        return result 
+        return result
 
     def _parse_token(self, token):
         for type in self.types:
@@ -180,7 +180,7 @@ class Parser:
                 return parser(result.group(1))
 
         raise self.UnknownSymbolError('Unknown symbol "{}"'.format(token))
-            
+
 
 class Interpreter:
     class UnknownFunctionError(Lispy.LispyError): pass
@@ -188,6 +188,7 @@ class Interpreter:
     def __init__(self):
         self.functions = {
             'quote': self._quote,
+            'list': self._list,
             'set': self._set,
             'get': self._get,
             '+': self._sum,
@@ -210,21 +211,23 @@ class Interpreter:
             return function(*args)
 
         raise self.UnknownFunctionError('Unknown function "{}"'.format(function_name))
-    
+
     def _evaluate_args(self, args):
         result = []
-        
+
         for arg in args:
             if type(arg) == list:
                 arg = self.execute(arg)
-        
+
             result.append(arg)
 
         return result
 
-
     def _quote(self, arg):
         return arg
+
+    def _list(self, *args):
+        return list(args)
 
     def _set(self, name, value):
         self.variables[name] = value

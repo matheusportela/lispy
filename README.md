@@ -22,12 +22,20 @@ $ python test_lispy.py
 ```
 
 ## Standard Library
-`quote`: Avoid evaluation of the given argument 
+`quote`: Avoid evaluation of the given argument
 ```lisp
 >>> (quote foo)
 foo
 >>> (quote (1 2 foo))
 (1 2 foo)
+```
+
+`list`: Create list evaluating the given arguments
+```lisp
+>>> (list 1)
+(1)
+>>> (list 1 2 3)
+(1 2 3)
 ```
 
 `set`: Set value to global variable
