@@ -2,15 +2,18 @@ __version__ = '0.0.1'
 
 import re
 
-
 def eval(instruction):
     return Lispy().eval(instruction)
-
 
 class Lispy:
     class LispyError(BaseException): pass
 
     def __init__(self):
+        # REPL stuff
+        self.prompt = '>>> '
+        self.farewell_message = 'bye!'
+
+        # Interpreter stuff
         self.lexer = Lexer()
         self.parser = Parser()
         self.interpreter = Interpreter()
@@ -23,11 +26,11 @@ class Lispy:
     def repl(self):
         try:
             while True:
-                string = input('>>> ')
+                string = input(self.prompt)
                 output = self.eval(string)
                 self._print(output)
-        except KeyboardInterrupt:
-            print('\nbye!')
+        except (KeyboardInterrupt, EOFError):
+            print('\n{}'.format(self.farewell_message))
     
     def _print(self, output):
         string = ''
@@ -125,5 +128,4 @@ class Interpreter:
 
 if __name__ == '__main__':
     print('lispy v{}'.format(__version__))
-    l = Lispy()
-    l.repl()
+    Lispy().repl()
