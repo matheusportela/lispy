@@ -1,6 +1,7 @@
 __version__ = '0.0.1'
 
 import re
+import readline
 
 def eval(instruction):
     return Lispy().eval(instruction)
@@ -25,15 +26,21 @@ class Lispy:
         return self.interpreter.execute(instruction)
 
     def repl(self):
+        readline.parse_and_bind('tab: complete')
+
         print(self.welcome_message)
 
-        try:
-            while True:
+        while True:
+            try:
                 string = input(self.prompt)
                 output = self.eval(string)
                 self._print(output)
-        except (KeyboardInterrupt, EOFError):
-            print('\n{}'.format(self.farewell_message))
+            except (KeyboardInterrupt, EOFError):
+                break
+            except self.LispyError as e:
+                print('ERROR: {}'.format(str(e)))
+        
+        print('\n{}'.format(self.farewell_message))
     
     def _print(self, output):
         string = ''
