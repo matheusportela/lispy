@@ -4,17 +4,24 @@ import lispy
 
 
 class TestLispy(unittest.TestCase):
+    def setUp(self):
+        self.lispy = lispy.Lispy()
+
     def test_empty_list_returns_none(self):
-        self.assertEqual(lispy.eval('()'), None) 
+        self.assertEqual(self.lispy.eval('()'), None) 
 
     def test_function_execution(self):
-        self.assertEqual(lispy.eval('(+ 1 2 3)'), 6)
+        self.assertEqual(self.lispy.eval('(+ 1 2 3)'), 6)
 
     def test_function_execution_with_nested_lists(self):
-        self.assertEqual(lispy.eval('(+ 1 2 (+ 3 4 5) (+ 6 7 8))'), 36)
+        self.assertEqual(self.lispy.eval('(+ 1 2 (+ 3 4 5) (+ 6 7 8))'), 36)
 
     def test_quote_does_not_evaluate_symbols(self):
-        self.assertEqual(lispy.eval('(quote foo)'), 'foo')
+        self.assertEqual(self.lispy.eval('(quote foo)'), 'foo')
+
+    def test_set_and_get_variable_values(self):
+        self.lispy.eval('(set (quote *foo*) 42)')
+        self.assertEqual(self.lispy.eval('(get (quote *foo*))'), 42)
 
 
 class TestLexer(unittest.TestCase):

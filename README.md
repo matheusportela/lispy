@@ -22,10 +22,26 @@ $ python test_lispy.py
 ```
 
 ## Standard Library
-`quote`: Define a new list
+`quote`: Avoid evaluation of the given argument 
 ```lisp
->>> (quote 1 2 3)
-(1 2 3)
+>>> (quote foo)
+foo
+>>> (quote (1 2 foo))
+(1 2 foo)
+```
+
+`set`: Set value to global variable
+```lisp
+>>> (set (quote *foo*) 42)
+nil
+```
+
+`get`: Get value from previous defined global variable
+```lisp
+>>> (set (quote *foo*) 42)
+nil
+>>> (get (quote *foo*))
+42
 ```
 
 `+` or `sum`: Sum all arguments

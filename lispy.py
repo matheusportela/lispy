@@ -47,8 +47,18 @@ class Lispy:
         
         if type(output) == list:
             string += '('
-            string += ' '.join([str(self._format_output(o)) if type(o) == list else str(o) for o in output]) 
+            result = []
+            for o in output:
+                if type(o) == list:
+                    result.append(str(self._format_output(o)))
+                elif o == None:
+                    result.append('nil')
+                else:
+                    result.append(str(o))
+            string += ' '.join(result) 
             string += ')'
+        elif output == None:
+            string = 'nil'
         else:
             string = str(output)
 
@@ -178,10 +188,12 @@ class Interpreter:
     def __init__(self):
         self.functions = {
             'quote': self._quote,
+            'set': self._set,
+            'get': self._get,
             '+': self._sum,
             'sum': self._sum,
         }
-        self.variableS = {}
+        self.variables = {}
 
     def execute(self, instruction):
         if not instruction:
@@ -213,6 +225,12 @@ class Interpreter:
 
     def _quote(self, arg):
         return arg
+
+    def _set(self, name, value):
+        self.variables[name] = value
+
+    def _get(self, name):
+        return self.variables[name]
 
     def _sum(self, *args):
         return sum(args)
