@@ -45,11 +45,17 @@ class TestParser(unittest.TestCase):
     def test_1_as_int(self):
         self.assertEqual(self.parser.parse(['quote', '1']), ['quote', 1])
 
+    def test_negative_1_as_int(self):
+        self.assertEqual(self.parser.parse(['quote', '-1']), ['quote', -1])
+
     def test_1_1_as_float(self):
         self.assertEqual(self.parser.parse(['quote', '1.1']), ['quote', 1.1])
 
     def test_0_1_as_float(self):
         self.assertEqual(self.parser.parse(['quote', '.1']), ['quote', 0.1])
+
+    def test_negative_1_1_as_float(self):
+        self.assertEqual(self.parser.parse(['quote', '-1.1']), ['quote', -1.1])
 
     def test_a_as_str(self):
         self.assertEqual(self.parser.parse(['quote', "'a'"]), ['quote', 'a'])

@@ -75,7 +75,7 @@ class Parser:
                 'parser': int
             },
             'float': {
-                'regex': r'^(\d*.\d+)$',
+                'regex': r'^(-?\d*.\d+)$',
                 'parser': float
             },
             'str': {
