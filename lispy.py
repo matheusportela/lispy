@@ -6,6 +6,64 @@ import readline
 
 class LispyError(BaseException): pass
 
+
+class Lispy:
+    def __init__(self):
+        # REPL attributes
+        self.prompt = '>>> '
+        self.welcome_message = ''
+        self.farewell_message = 'bye!'
+
+        # Interpreter attributes
+        self.lexer = Lexer()
+        self.parser = Parser()
+        self.interpreter = Interpreter()
+
+    def eval(self, string):
+        tokens = self.lexer.tokenize(string)
+        instruction = self.parser.parse(tokens)
+        return self.interpreter.execute(instruction)
+
+    def repl(self):
+        readline.parse_and_bind('tab: complete')
+
+        print(self.welcome_message)
+
+        while True:
+            try:
+                string = input(self.prompt)
+                output = self.eval(string)
+                print(self._format_output(output))
+            except LispyError as e:
+                print('ERROR: {}'.format(str(e)))
+            except (KeyboardInterrupt, EOFError):
+                break
+
+        print('\n{}'.format(self.farewell_message))
+
+    def _format_output(self, output):
+        string = ''
+
+        if type(output) == list:
+            string += '('
+            result = []
+            for o in output:
+                if type(o) == list:
+                    result.append(str(self._format_output(o)))
+                elif o == None:
+                    result.append('nil')
+                else:
+                    result.append(str(o))
+            string += ' '.join(result)
+            string += ')'
+        elif output == None:
+            string = 'nil'
+        else:
+            string = str(output)
+
+        return string
+
+
 class Type:
     def __init__(self, value):
         self._assert_type(value)
@@ -77,62 +135,6 @@ class List(Type):
     def _assert_type(self, value):
         if not isinstance(value, Type):
             raise TypeError('Value "{}" is not a valid type'.format(value))
-
-class Lispy:
-    def __init__(self):
-        # REPL attributes
-        self.prompt = '>>> '
-        self.welcome_message = ''
-        self.farewell_message = 'bye!'
-
-        # Interpreter attributes
-        self.lexer = Lexer()
-        self.parser = Parser()
-        self.interpreter = Interpreter()
-
-    def eval(self, string):
-        tokens = self.lexer.tokenize(string)
-        instruction = self.parser.parse(tokens)
-        return self.interpreter.execute(instruction)
-
-    def repl(self):
-        readline.parse_and_bind('tab: complete')
-
-        print(self.welcome_message)
-
-        while True:
-            try:
-                string = input(self.prompt)
-                output = self.eval(string)
-                print(self._format_output(output))
-            except LispyError as e:
-                print('ERROR: {}'.format(str(e)))
-            except (KeyboardInterrupt, EOFError):
-                break
-
-        print('\n{}'.format(self.farewell_message))
-
-    def _format_output(self, output):
-        string = ''
-
-        if type(output) == list:
-            string += '('
-            result = []
-            for o in output:
-                if type(o) == list:
-                    result.append(str(self._format_output(o)))
-                elif o == None:
-                    result.append('nil')
-                else:
-                    result.append(str(o))
-            string += ' '.join(result)
-            string += ')'
-        elif output == None:
-            string = 'nil'
-        else:
-            string = str(output)
-
-        return string
 
 
 class Lexer:
