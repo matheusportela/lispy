@@ -206,7 +206,7 @@ class Parser:
 
     def parse(self, tokens):
         if not tokens:
-            return []
+            return Nil()
 
         result = []
 
@@ -249,7 +249,7 @@ class Interpreter:
         if instruction.__class__ in [Symbol, Integer, Float, String]:
             raise self.UndefinedSymbolError('Undefined symbol "{}"'.format(instruction))
 
-        if not instruction:
+        if instruction == Nil():
             return Nil()
 
         if instruction.__class__ == List:

@@ -174,7 +174,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(value.__class__, String)
 
     def test_empty_list(self):
-        self.assertEqual(self.parser.parse([]), [])
+        self.assertEqual(self.parser.parse([]), Nil())
 
     def test_first_element_is_not_parsed(self):
         self.assertEqual(self.parser.parse(['foo']), List(Symbol('foo')))
