@@ -3,8 +3,6 @@ __version__ = '0.0.1'
 import re
 import readline
 
-def eval(instruction):
-    return Lispy().eval(instruction)
 
 class LispyError(BaseException): pass
 
@@ -48,6 +46,12 @@ class Symbol(Type):
     def __eq__(self, other):
         return other.__class__ == self.__class__ and self.value == other.value
 
+    def __ne__(self, other):
+        return other.__class__ != self.__class__ or self.value != other.value
+
+    def __hash__(self):
+        return hash(self.__class__.__name__ + self.value)
+
     def __repr__(self):
         return ':{}'.format(self.value)
 
@@ -57,16 +61,22 @@ class Symbol(Type):
 
 class List(Type):
     def __init__(self, *elements):
-        self._assert_type(elements)
+        [self._assert_type(element) for element in elements]
         self.value = list(elements)
+
+    def __getitem__(self, i):
+        return self.value[i]
+
+    def __setitem__(self, i, value):
+        self._assert_type(value)
+        self.value[i] = value
 
     def __repr__(self):
         return '(' + ' '.join([str(v) for v in self.value]) + ')'
 
-    def _assert_type(self, elements):
-        for element in elements:
-            if not isinstance(element, Type):
-                raise TypeError('Value "{}" is not a valid type'.format(element))
+    def _assert_type(self, value):
+        if not isinstance(value, Type):
+            raise TypeError('Value "{}" is not a valid type'.format(value))
 
 class Lispy:
     def __init__(self):
@@ -95,7 +105,7 @@ class Lispy:
                 string = input(self.prompt)
                 output = self.eval(string)
                 print(self._format_output(output))
-            except self.LispyError as e:
+            except LispyError as e:
                 print('ERROR: {}'.format(str(e)))
             except (KeyboardInterrupt, EOFError):
                 break
@@ -196,19 +206,19 @@ class Parser:
         self.type_parser = {
             'nil': {
                 'regex': '^(nil)$',
-                'parser': lambda t: None
+                'parser': lambda x: Nil()
             },
-            'int': {
+            'integer': {
                 'regex': r'^(-?\d+)$',
-                'parser': int
+                'parser': lambda x: Integer(int(x))
             },
             'float': {
                 'regex': r'^(-?\d*.\d+)$',
-                'parser': float
+                'parser': lambda x: Float(float(x))
             },
-            'str': {
+            'string': {
                 'regex': r'^\'(\w+)\'$',
-                'parser': str
+                'parser': lambda x: String(x)
             },
         }
         self.types = self.type_parser.keys()
@@ -217,10 +227,7 @@ class Parser:
         if not tokens:
             return []
 
-        if tokens[0] == 'quote':
-            return tokens
-
-        result = [tokens[0]]
+        result = [Symbol(tokens[0])]
 
         for token in tokens[1:]:
             if type(token) == list:
@@ -228,7 +235,7 @@ class Parser:
             else:
                 result.append(self._parse_token(token))
 
-        return result
+        return List(*result)
 
     def _parse_token(self, token):
         for type in self.types:
@@ -239,36 +246,41 @@ class Parser:
                 parser = self.type_parser[type]['parser']
                 return parser(result.group(1))
 
-        raise self.UnknownSymbolError('Unknown symbol "{}"'.format(token))
+        return Symbol(token)
 
 
 class Interpreter:
+    class UnknownSymbolError(LispyError): pass
     class UnknownFunctionError(LispyError): pass
 
     def __init__(self):
         self.functions = {
-            'quote': self._quote,
-            'list': self._list,
-            'set': self._set,
-            'get': self._get,
-            '+': self._sum,
-            'sum': self._sum,
+            Symbol('quote'): self._quote,
+            Symbol('list'): self._list,
+            Symbol('set'): self._set,
+            Symbol('get'): self._get,
+            Symbol('+'): self._sum,
+            Symbol('sum'): self._sum,
         }
         self.variables = {}
 
     def execute(self, instruction):
+        if instruction.__class__ in [Symbol, Integer, Float, String]:
+            raise self.UnknownSymbolError('Unknown symbol "{}"'.format(instruction))
+
         if not instruction:
-            return None
+            return Nil()
 
-        function_name = instruction[0]
-        args = instruction[1:]
+        if instruction.__class__ == List:
+            function_name = instruction[0]
+            args = instruction[1:]
 
-        if function_name != 'quote':
-            args = self._evaluate_args(args)
+            if function_name != Symbol('quote'):
+                args = self._evaluate_args(args)
 
-        if function_name in self.functions:
-            function = self.functions[function_name]
-            return function(*args)
+            if function_name in self.functions:
+                function = self.functions[function_name]
+                return function(*args)
 
         raise self.UnknownFunctionError('Unknown function "{}"'.format(function_name))
 
@@ -276,7 +288,7 @@ class Interpreter:
         result = []
 
         for arg in args:
-            if type(arg) == list:
+            if arg.__class__ in [Symbol, List]:
                 arg = self.execute(arg)
 
             result.append(arg)
@@ -296,7 +308,12 @@ class Interpreter:
         return self.variables[name]
 
     def _sum(self, *args):
-        return sum(args)
+        if all(a.__class__ == Integer for a in args):
+            output_class = Integer
+        else:
+            output_class = Float
+
+        return output_class(sum([a.value for a in args]))
 
 
 if __name__ == '__main__':
