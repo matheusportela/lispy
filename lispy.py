@@ -42,26 +42,7 @@ class Lispy:
         print('\n{}'.format(self.farewell_message))
 
     def _format_output(self, output):
-        string = ''
-
-        if type(output) == list:
-            string += '('
-            result = []
-            for o in output:
-                if type(o) == list:
-                    result.append(str(self._format_output(o)))
-                elif o == None:
-                    result.append('nil')
-                else:
-                    result.append(str(o))
-            string += ' '.join(result)
-            string += ')'
-        elif output == None:
-            string = 'nil'
-        else:
-            string = str(output)
-
-        return string
+        return str(output)
 
 
 class Type:
@@ -202,8 +183,6 @@ class Lexer:
 
 
 class Parser:
-    class UnknownSymbolError(LispyError): pass
-
     def __init__(self):
         self.type_parser = {
             'nil': {
@@ -229,9 +208,9 @@ class Parser:
         if not tokens:
             return []
 
-        result = [Symbol(tokens[0])]
+        result = []
 
-        for token in tokens[1:]:
+        for token in tokens:
             if type(token) == list:
                 result.append(self.parse(token))
             else:
@@ -252,8 +231,8 @@ class Parser:
 
 
 class Interpreter:
-    class UnknownSymbolError(LispyError): pass
-    class UnknownFunctionError(LispyError): pass
+    class UndefinedSymbolError(LispyError): pass
+    class UndefinedFunctionError(LispyError): pass
 
     def __init__(self):
         self.functions = {
@@ -268,7 +247,7 @@ class Interpreter:
 
     def execute(self, instruction):
         if instruction.__class__ in [Symbol, Integer, Float, String]:
-            raise self.UnknownSymbolError('Unknown symbol "{}"'.format(instruction))
+            raise self.UndefinedSymbolError('Undefined symbol "{}"'.format(instruction))
 
         if not instruction:
             return Nil()
@@ -284,7 +263,7 @@ class Interpreter:
                 function = self.functions[function_name]
                 return function(*args)
 
-        raise self.UnknownFunctionError('Unknown function "{}"'.format(function_name))
+        raise self.UndefinedFunctionError('Undefined function "{}"'.format(function_name))
 
     def _evaluate_args(self, args):
         result = []
@@ -301,7 +280,7 @@ class Interpreter:
         return arg
 
     def _list(self, *args):
-        return list(args)
+        return List(*args)
 
     def _set(self, name, value):
         self.variables[name] = value

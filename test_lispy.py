@@ -19,7 +19,7 @@ class TestLispy(unittest.TestCase):
         self.assertEqual(self.lispy.eval('(list 1 2 3)'), [1, 2, 3])
 
     def test_list_evaluate_args(self):
-        with self.assertRaises(Interpreter.UnknownSymbolError):
+        with self.assertRaises(Interpreter.UndefinedSymbolError):
             result = self.lispy.eval('(list 1 2 foo)')
 
     def test_sum_with_multiple_numbers(self):
@@ -32,7 +32,7 @@ class TestLispy(unittest.TestCase):
         self.assertEqual(self.lispy.eval('(quote foo)'), Symbol('foo'))
 
     def test_quote_does_not_evaluate_lists(self):
-        self.assertEqual(self.lispy.eval('(quote (foo bar))'), [Symbol('foo'), Symbol('bar')])
+        self.assertEqual(self.lispy.eval('(quote (1 foo))'), [Integer(1), Symbol('foo')])
 
     def test_set_and_get_variable_values(self):
         self.lispy.eval('(set (quote *foo*) 42)')
@@ -177,7 +177,7 @@ class TestParser(unittest.TestCase):
         self.assertEqual(self.parser.parse([]), [])
 
     def test_first_element_is_not_parsed(self):
-        self.assertEqual(self.parser.parse(['nil']), List(Symbol('nil')))
+        self.assertEqual(self.parser.parse(['foo']), List(Symbol('foo')))
 
     def test_symbol(self):
         self.assertEqual(self.parser.parse(['foo', 'abc']), List(Symbol('foo'), Symbol('abc')))
@@ -241,7 +241,7 @@ class TestInterpreter(unittest.TestCase):
         self.interpreter = Interpreter()
 
     def test_raises_error_on_unknown_function(self):
-        with self.assertRaises(Interpreter.UnknownFunctionError):
+        with self.assertRaises(Interpreter.UndefinedFunctionError):
             self.interpreter.execute(
                 List(
                     Symbol('abc'),
