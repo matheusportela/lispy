@@ -6,9 +6,69 @@ import readline
 def eval(instruction):
     return Lispy().eval(instruction)
 
-class Lispy:
-    class LispyError(BaseException): pass
+class LispyError(BaseException): pass
 
+class Type:
+    def __init__(self, value):
+        self._assert_type(value)
+        self.value = value
+
+    def __eq__(self, other):
+        return self.value == other
+
+    def __repr__(self):
+        return str(self.value)
+
+    def _assert_type(self, value):
+        raise NotImplementedError('Types must implement "_assert_type" method')
+
+class Nil(Type):
+    def __init__(self):
+        self.value = None
+
+    def __repr__(self):
+        return 'nil'
+
+class Integer(Type):
+    def _assert_type(self, value):
+        if type(value) != int:
+            raise TypeError('Value "{}" is not an integer'.format(value))
+
+class Float(Type):
+    def _assert_type(self, value):
+        if type(value) != float:
+            raise TypeError('Value "{}" is not a float'.format(value))
+
+class String(Type):
+    def _assert_type(self, value):
+        if type(value) != str:
+            raise TypeError('Value "{}" is not a string'.format(value))
+
+class Symbol(Type):
+    def __eq__(self, other):
+        return other.__class__ == self.__class__ and self.value == other.value
+
+    def __repr__(self):
+        return ':{}'.format(self.value)
+
+    def _assert_type(self, value):
+        if type(value) != str:
+            raise TypeError('Value "{}" is not a symbol'.format(value))
+
+class List(Type):
+    def __init__(self, *elements):
+        self._assert_type(elements)
+        self.value = list(elements)
+
+    def __repr__(self):
+        return '(' + ' '.join([str(v) for v in self.value]) + ')'
+
+    def _assert_type(self, elements):
+        for element in elements:
+            if not isinstance(element, Type):
+                raise TypeError('Value "{}" is not a valid type'.format(element))
+
+class Lispy:
     def __init__(self):
         # REPL attributes
         self.prompt = '>>> '
@@ -66,7 +126,7 @@ class Lispy:
 
 
 class Lexer:
-    class InvalidInputError(Lispy.LispyError): pass
+    class InvalidInputError(LispyError): pass
 
     def tokenize(self, string):
         if not string:
@@ -130,7 +190,7 @@ class Lexer:
 
 
 class Parser:
-    class UnknownSymbolError(Lispy.LispyError): pass
+    class UnknownSymbolError(LispyError): pass
 
     def __init__(self):
         self.type_parser = {
@@ -183,7 +243,7 @@ class Parser:
 
 
 class Interpreter:
-    class UnknownFunctionError(Lispy.LispyError): pass
+    class UnknownFunctionError(LispyError): pass
 
     def __init__(self):
         self.functions = {

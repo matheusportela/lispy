@@ -40,6 +40,71 @@ class TestLispy(unittest.TestCase):
         self.assertEqual(self.lispy.eval('(get (quote *foo*))'), 42)
 
 
+class TestTypes(unittest.TestCase):
+    def test_nil_value(self):
+        self.assertEqual(lispy.Nil(), None)
+
+    def test_nil_representation(self):
+        self.assertEqual(str(lispy.Nil()), 'nil')
+
+    def test_integer_value(self):
+        self.assertEqual(lispy.Integer(1), 1)
+
+    def test_integer_representation(self):
+        self.assertEqual(str(lispy.Integer(1)), '1')
+
+    def test_integer_type_assertion(self):
+        with self.assertRaises(TypeError):
+            lispy.Integer(1.0)
+
+    def test_float_value(self):
+        self.assertEqual(lispy.Float(1.0), 1.0)
+
+    def test_float_representation(self):
+        self.assertEqual(str(lispy.Float(1.0)), '1.0')
+
+    def test_float_type_assertion(self):
+        with self.assertRaises(TypeError):
+            lispy.Float(1)
+
+    def test_string_value(self):
+        self.assertEqual(lispy.String('abc'), 'abc')
+
+    def test_string_representation(self):
+        self.assertEqual(str(lispy.String('abc')), 'abc')
+
+    def test_string_type_assertion(self):
+        with self.assertRaises(TypeError):
+            lispy.String(1)
+
+    def test_symbol_value(self):
+        self.assertEqual(lispy.Symbol('abc'), lispy.Symbol('abc'))
+        self.assertNotEqual(lispy.Symbol('abc'), lispy.String('abc'))
+
+    def test_symbol_representation(self):
+        self.assertEqual(str(lispy.Symbol('abc')), ':abc')
+
+    def test_symbol_type_assertion(self):
+        with self.assertRaises(TypeError):
+            lispy.Symbol(1)
+
+    def test_list_value(self):
+        self.assertEqual(lispy.List(lispy.Integer(1), lispy.Integer(2), lispy.Integer(3)), [1, 2, 3])
+
+    def test_list_representation(self):
+        self.assertEqual(str(lispy.List(lispy.Integer(1), lispy.Integer(2), lispy.Integer(3))), '(1 2 3)')
+
+    def test_list_type_assertion(self):
+        with self.assertRaises(TypeError):
+            lispy.List(1)
+
+    def test_empty_list_value(self):
+        self.assertEqual(lispy.List(), [])
+
+    def test_empty_list_representation(self):
+        self.assertEqual(str(lispy.List()), '()')
+
+
 class TestLexer(unittest.TestCase):
     def setUp(self):
         self.lexer = lispy.Lexer()
