@@ -276,6 +276,7 @@ class Interpreter:
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,
             Symbol('let'): self._let,
+            Symbol('write'): self._write,
         }
 
     def execute(self, instruction):
@@ -391,6 +392,10 @@ class Interpreter:
 
 
         return result
+
+    def _write(self, arg):
+        print(arg)
+        return Nil()
 
 
 if __name__ == '__main__':

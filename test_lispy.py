@@ -2,6 +2,12 @@ import unittest
 
 from lispy import *
 
+# Disable stdout
+import os
+import sys
+sys.stdout = open(os.devnull, 'w')
+
+
 class TestLispy(unittest.TestCase):
     def setUp(self):
         self.lispy = Lispy()
@@ -61,6 +67,9 @@ class TestLispy(unittest.TestCase):
 
     def test_eval_with_new_lines(self):
         self.assertEqual(self.lispy.eval('(+ 1\n2)'), 3)
+
+    def test_write_returns_nil(self):
+        self.assertEqual(self.lispy.eval('(write 1)'), Nil())
 
 
 class TestTypes(unittest.TestCase):
