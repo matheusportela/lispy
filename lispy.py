@@ -330,7 +330,7 @@ class Interpreter:
             function_name = instruction[0]
             args = instruction[1:]
 
-            if function_name not in [Symbol('quote'), Symbol('let'), Symbol('progn')]:
+            if function_name not in [Symbol('quote'), Symbol('let'), Symbol('progn'), Symbol('set'), Symbol('get')]:
                 args = self._evaluate_args(args)
 
             if function_name in self.functions:
@@ -405,6 +405,7 @@ class Interpreter:
         return List(*args)
 
     def _set(self, name, value):
+        value = self.execute(value) if value.__class__ == List else value
         self._set_global_variable(name, value)
 
     def _get(self, name):
