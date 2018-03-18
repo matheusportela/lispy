@@ -314,6 +314,9 @@ class Interpreter:
             Symbol('read'): self._read,
             Symbol('progn'): self._progn,
             Symbol('concat'): self._concat,
+            Symbol('float'): self._float,
+            Symbol('int'): self._int,
+            Symbol('str'): self._str,
         }
 
     def execute(self, instruction):
@@ -474,6 +477,15 @@ class Interpreter:
     def _concat(self, *args):
         strings = [arg.value for arg in args]
         return String(''.join(strings))
+
+    def _float(self, arg):
+        return Float(float(arg.value))
+
+    def _int(self, arg):
+        return Int(int(arg.value))
+
+    def _str(self, arg):
+        return String(str(arg.value))
 
 
 if __name__ == '__main__':
