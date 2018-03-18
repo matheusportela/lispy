@@ -304,6 +304,9 @@ class Interpreter:
             Symbol('sum'): self._sum,
             Symbol('let'): self._let,
             Symbol('write'): self._write,
+            Symbol('read'): self._read,
+            Symbol('progn'): self._progn,
+            Symbol('concat'): self._concat,
         }
 
     def execute(self, instruction):
@@ -317,7 +320,7 @@ class Interpreter:
             function_name = instruction[0]
             args = instruction[1:]
 
-            if function_name not in [Symbol('quote'), Symbol('let')]:
+            if function_name not in [Symbol('quote'), Symbol('let'), Symbol('progn')]:
                 args = self._evaluate_args(args)
 
             if function_name in self.functions:
@@ -420,9 +423,25 @@ class Interpreter:
 
         return result
 
-    def _write(self, arg):
-        print(arg)
+    def _write(self, arg, end='\n'):
+        if end == Nil():
+            end = ''
+        print(arg, end=end)
         return Nil()
+
+    def _read(self):
+        return String(input())
+
+    def _progn(self, *instructions):
+        result = Nil()
+        for instruction in instructions:
+            result = self.execute(instruction)
+
+        return result
+
+    def _concat(self, *args):
+        strings = [arg.value for arg in args]
+        return String(''.join(strings))
 
 
 if __name__ == '__main__':

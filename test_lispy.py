@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from lispy import *
 
@@ -71,6 +72,19 @@ class TestLispy(unittest.TestCase):
     def test_write_returns_nil(self):
         self.assertEqual(self.lispy.eval('(write 1)'), Nil())
 
+    @patch('builtins.input', return_value='abc')
+    def test_read_returns_string(self, input):
+        self.assertEqual(self.lispy.eval('(read)'), String('abc'))
+
+    @patch('builtins.input', return_value='123')
+    def test_read_returns_number_as_string(self, input):
+        self.assertEqual(self.lispy.eval('(read)'), String('123'))
+
+    def test_concat(self):
+        self.assertEqual(self.lispy.eval('(concat "abc" "def")'), String('abcdef'))
+
+    def test_concat_with_variables(self):
+        self.assertEqual(self.lispy.eval('(let ((x "abc")) (concat x "def"))'), String('abcdef'))
 
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):
