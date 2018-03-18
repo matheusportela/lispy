@@ -38,6 +38,27 @@ class TestLispy(unittest.TestCase):
         self.lispy.eval('(set (quote *foo*) 42)')
         self.assertEqual(self.lispy.eval('(get (quote *foo*))'), 42)
 
+    def test_let_with_sum(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1) (y 2)) (+ x y))'), 3)
+
+    def test_let_with_negative_sum(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1) (y -2)) (+ x y))'), -1)
+
+    def test_nested_lets(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1)) (let ((y 2)) (+ x y)))'), 3)
+
+    def test_let_with_same_variable_name(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1)) (let ((x 2)) (+ x x)))'), 4)
+
+    def test_let_without_instructions(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1)))'), Nil())
+
+    def test_let_with_multiple_instructions(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1) (y 2)) (+ x x) (+ x y))'), 3)
+
+    def test_let_with_local_binding(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1)) (let ((x 2))) (+ x 2))'), 3)
+
 
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):

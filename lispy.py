@@ -233,8 +233,12 @@ class Parser:
 class Interpreter:
     class UndefinedSymbolError(LispyError): pass
     class UndefinedFunctionError(LispyError): pass
+    class UndefinedVariableError(LispyError): pass
 
     def __init__(self):
+        self.global_variable_context = {}
+        self.local_variable_contexts = []
+
         self.functions = {
             Symbol('quote'): self._quote,
             Symbol('list'): self._list,
@@ -242,8 +246,8 @@ class Interpreter:
             Symbol('get'): self._get,
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,
+            Symbol('let'): self._let,
         }
-        self.variables = {}
 
     def execute(self, instruction):
         if instruction.__class__ in [Symbol, Integer, Float, String]:
@@ -256,7 +260,7 @@ class Interpreter:
             function_name = instruction[0]
             args = instruction[1:]
 
-            if function_name != Symbol('quote'):
+            if function_name not in [Symbol('quote'), Symbol('let')]:
                 args = self._evaluate_args(args)
 
             if function_name in self.functions:
@@ -269,12 +273,60 @@ class Interpreter:
         result = []
 
         for arg in args:
-            if arg.__class__ in [Symbol, List]:
+            if arg.__class__ == List:
                 arg = self.execute(arg)
+            elif arg.__class__ == Symbol:
+                arg = self._get_variable(arg) if self._is_variable(arg) else self.execute(arg)
 
             result.append(arg)
 
         return result
+
+    def _get_variable(self, name):
+        local_variable_context = self._find_local_variable_context(name)
+        if local_variable_context is not None:
+            return local_variable_context[name]
+        elif self._is_global_variable(name):
+            return self._get_global_variable(name)
+        raise self.UndefinedVariableError('Undefined variable "{}"'.format(name))
+
+    def _is_variable(self, name):
+        return self._is_global_variable(name) or self._is_local_variable(name)
+
+    def _get_global_variable(self, name):
+        return self.global_variable_context[name]
+
+    def _set_global_variable(self, name, value):
+        self.global_variable_context[name] = value
+
+    def _is_global_variable(self, name):
+        return name in self.global_variable_context
+
+    def _get_local_variable(self, name):
+        local_variable_context = self._find_local_variable_context(name)
+        if local_variable_context is not None:
+            return local_variable_context[name]
+        raise self.UndefinedVariableError('Undefined local variable "{}"'.format(name))
+
+    def _set_local_variable(self, name, value):
+        self.local_variable_contexts[0][name] = value
+
+    def _is_local_variable(self, name):
+        return self._find_local_variable_context(name) is not None
+
+    def _find_local_variable_context(self, name):
+        for local_variable_context in self.local_variable_contexts:
+            if name in local_variable_context:
+                return local_variable_context
+        return None
+
+    def _create_local_variable_context(self):
+        self.local_variable_contexts.insert(0, {})
+
+    def _delete_local_variable_context(self):
+        self.local_variable_contexts.pop(0)
+
+    # Functions
 
     def _quote(self, arg):
         return arg
@@ -283,10 +335,10 @@ class Interpreter:
         return List(*args)
 
     def _set(self, name, value):
-        self.variables[name] = value
+        self._set_global_variable(name, value)
 
     def _get(self, name):
-        return self.variables[name]
+        return self._get_global_variable(name)
 
     def _sum(self, *args):
         if all(a.__class__ == Integer for a in args):
@@ -295,6 +347,21 @@ class Interpreter:
             output_class = Float
 
         return output_class(sum([a.value for a in args]))
+
+    def _let(self, var_defs, *instructions):
+        self._create_local_variable_context()
+
+        for name, value in var_defs:
+            self._set_local_variable(name, value)
+
+        result = Nil()
+        for instruction in instructions:
+            result = self.execute(instruction)
+
+        self._delete_local_variable_context()
+
+
+        return result
 
 
 if __name__ == '__main__':
