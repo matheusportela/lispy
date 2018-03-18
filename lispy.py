@@ -31,7 +31,7 @@ class Lispy:
 
         while True:
             try:
-                string = input(self.prompt)
+                string = self._read_input()
                 output = self.eval(string)
                 print(self._format_output(output))
             except LispyError as e:
@@ -40,6 +40,32 @@ class Lispy:
                 break
 
         print('\n{}'.format(self.farewell_message))
+
+    def _read_input(self):
+        buffer = []
+        parentheses_difference = 0
+
+        while parentheses_difference > 0 or not buffer:
+            indentation = self._calculate_indentation(buffer, parentheses_difference)
+            string = input(self.prompt + ' ' * indentation)
+            buffer.append(string)
+            parentheses_difference += string.count('(') - string.count(')')
+
+        return ' '.join(buffer)
+
+    def _calculate_indentation(self, buffer, parentheses_difference):
+        if not buffer:
+            return 0
+
+        parenthesis_position = {}
+
+        for string in buffer:
+            positions = [i for i, s in enumerate(string) if s == '(']
+            for position in positions:
+                parenthesis_position[len(parenthesis_position)] = position
+
+        return parenthesis_position[parentheses_difference - 1] + 1  # next space after the parenthesis
+
 
     def _format_output(self, output):
         return str(output)
@@ -124,7 +150,10 @@ class Lexer:
     def tokenize(self, string):
         if not string:
             return []
-        elif string[0] == '(':
+
+        string = string.replace('\n', ' ')
+
+        if string[0] == '(':
             return self.tokenize_list(list(string))
         else:
             return self.tokenize_words(list(string))

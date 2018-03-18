@@ -59,6 +59,9 @@ class TestLispy(unittest.TestCase):
     def test_let_with_local_binding(self):
         self.assertEqual(self.lispy.eval('(let ((x 1)) (let ((x 2))) (+ x 2))'), 3)
 
+    def test_eval_with_new_lines(self):
+        self.assertEqual(self.lispy.eval('(+ 1\n2)'), 3)
+
 
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):
