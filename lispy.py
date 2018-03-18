@@ -1,5 +1,6 @@
 __version__ = '0.0.1'
 
+import argparse
 import re
 import readline
 
@@ -69,6 +70,11 @@ class Lispy:
 
     def _format_output(self, output):
         return str(output)
+
+    def execute_script(self, filename):
+        with open(filename) as fd:
+            string = fd.read()
+        self.eval(string)
 
 
 class Type:
@@ -420,5 +426,12 @@ class Interpreter:
 
 
 if __name__ == '__main__':
-    print('lispy v{}'.format(__version__))
-    Lispy().repl()
+    parser = argparse.ArgumentParser(description='lispy v{}'.format(__version__))
+    parser.add_argument('filename', nargs='?', help='program read from script file')
+    args = parser.parse_args()
+
+    if args.filename:
+        Lispy().execute_script(args.filename)
+    else:
+        print('lispy v{}'.format(__version__))
+        Lispy().repl()
