@@ -173,6 +173,9 @@ class TestLexer(unittest.TestCase):
     def test_tokenize_with_closing_parenthesis(self):
         self.assertEqual(self.lexer.tokenize('abc(def'), ['abc'])
 
+    def test_tokenize_with_quotes(self):
+        self.assertEqual(self.lexer.tokenize('"abc def"'), ['"abc def"'])
+
     def test_tokenize_with_empty_list(self):
         self.assertEqual(self.lexer.tokenize('()'), [])
 
@@ -246,17 +249,22 @@ class TestParser(unittest.TestCase):
         self.assert_float(result)
 
     def test_a_as_string(self):
-        result = self.parser.parse(['foo', "'a'"])[1]
+        result = self.parser.parse(['foo', '"a"'])[1]
         self.assertEqual(result, String('a'))
         self.assert_string(result)
 
     def test_abc_as_string(self):
-        result = self.parser.parse(['foo', "'abc'"])[1]
+        result = self.parser.parse(['foo', '"abc"'])[1]
         self.assertEqual(result, String('abc'))
         self.assert_string(result)
 
+    def test_abc_def_as_string(self):
+        result = self.parser.parse(['foo', '"abc def"'])[1]
+        self.assertEqual(result, String('abc def'))
+        self.assert_string(result)
+
     def test_nested_lists(self):
-        result = self.parser.parse(['foo', 'nil', ['foo', ['foo', '2', '3.0'], "'abc'"]])
+        result = self.parser.parse(['foo', 'nil', ['foo', ['foo', '2', '3.0'], '"abc"']])
 
         self.assertEqual(result[1], Nil())
         self.assertEqual(result[2][1][1], Integer(2))

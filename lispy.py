@@ -179,6 +179,7 @@ class Lexer:
     def tokenize_words(self, chars):
         words_delimiters = '()'
         words_ignores = ' '
+        literal_delimiters = '"'
         result = []
 
         while chars:
@@ -189,6 +190,9 @@ class Lexer:
                 break
             elif char in words_ignores:
                 continue
+            elif char in literal_delimiters:
+                chars.insert(0, char)
+                result.append(self.tokenize_literal(chars))
             else:
                 chars.insert(0, char)
                 result.append(self.tokenize_word(chars))
@@ -204,6 +208,23 @@ class Lexer:
 
             if char in word_delimiters:
                 chars.insert(0, char)
+                break
+            else:
+                result.append(char)
+
+        return ''.join(result)
+
+    def tokenize_literal(self, chars):
+        literal_delimiters = '"'
+        result = []
+        char = chars.pop(0) # ignore first '"'
+        result.append(char)
+
+        while chars:
+            char = chars.pop(0)
+
+            if char in literal_delimiters:
+                result.append(char)
                 break
             else:
                 result.append(char)
@@ -227,7 +248,7 @@ class Parser:
                 'parser': lambda x: Float(float(x))
             },
             'string': {
-                'regex': r'^\'(\w+)\'$',
+                'regex': r'^"(.*)"$',
                 'parser': lambda x: String(x)
             },
         }
