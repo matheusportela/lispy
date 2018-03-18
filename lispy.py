@@ -302,6 +302,13 @@ class Interpreter:
             Symbol('get'): self._get,
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,
+            Symbol('-'): self._sub,
+            Symbol('sub'): self._sub,
+            Symbol('*'): self._mul,
+            Symbol('mul'): self._mul,
+            Symbol('/'): self._div,
+            Symbol('div'): self._div,
+            Symbol('pow'): self._pow,
             Symbol('let'): self._let,
             Symbol('write'): self._write,
             Symbol('read'): self._read,
@@ -401,12 +408,37 @@ class Interpreter:
         return self._get_global_variable(name)
 
     def _sum(self, *args):
+        output_class = self._cast_arithmetic_values(args)
+        return output_class(sum([a.value for a in args]))
+
+    def _sub(self, x, y=None):
+        if y:
+            output_class = self._cast_arithmetic_values([x, y])
+            result = output_class(x.value - y.value)
+        else:
+            x.value *= -1
+            result = x
+
+        return result
+
+    def _mul(self, x, y):
+        output_class = self._cast_arithmetic_values([x, y])
+        return output_class(x.value * y.value)
+
+    def _cast_arithmetic_values(self, args):
         if all(a.__class__ == Integer for a in args):
             output_class = Integer
         else:
             output_class = Float
 
-        return output_class(sum([a.value for a in args]))
+        return output_class
+
+    def _div(self, x, y):
+        return Float(x.value / y.value)
+
+    def _pow(self, x, y):
+        output_class = self._cast_arithmetic_values([x, y])
+        return output_class(x.value**y.value)
 
     def _let(self, var_defs, *instructions):
         self._create_local_variable_context()

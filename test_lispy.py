@@ -35,6 +35,21 @@ class TestLispy(unittest.TestCase):
     def test_sum_with_nested_lists(self):
         self.assertEqual(self.lispy.eval('(+ 1 2 (+ 3 4 5) (+ 6 7 8))'), 36)
 
+    def test_sub_with_two_numbers(self):
+        self.assertEqual(self.lispy.eval('(- 1 2)'), -1)
+
+    def test_sub_with_one_number(self):
+        self.assertEqual(self.lispy.eval('(- 1)'), -1)
+
+    def test_mul_with_two_numbers(self):
+        self.assertEqual(self.lispy.eval('(* 2 3)'), 6)
+
+    def test_div_with_two_numbers(self):
+        self.assertEqual(self.lispy.eval('(/ 6 3)'), 2)
+
+    def test_power_with_two_numbers(self):
+        self.assertEqual(self.lispy.eval('(pow 2 3)'), 8)
+
     def test_quote_does_not_evaluate_symbols(self):
         self.assertEqual(self.lispy.eval('(quote foo)'), Symbol('foo'))
 
