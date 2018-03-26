@@ -111,6 +111,10 @@ class TestLispy(unittest.TestCase):
         with self.assertRaises(Interpreter.UndefinedSymbolError):
             self.lispy.eval('(+ x y)')
 
+    def test_function_evals_args(self):
+        self.lispy.eval('(defun foo (x y) (+ x y))')
+        self.assertEqual(self.lispy.eval('(foo (+ 2 3) (- 7 3))'), 9)
+
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):
         self.assertEqual(Nil(), None)

@@ -443,9 +443,12 @@ class Interpreter:
 
         return result
 
-    def _mul(self, x, y):
-        output_class = self._cast_arithmetic_values([x, y])
-        return output_class(x.value * y.value)
+    def _mul(self, *args):
+        output_class = self._cast_arithmetic_values(args)
+        result = 1
+        for arg in args:
+            result *= arg.value
+        return output_class(result)
 
     def _cast_arithmetic_values(self, args):
         if all(a.__class__ == Integer for a in args):
@@ -477,7 +480,11 @@ class Interpreter:
         return result
 
     def _defun(self, function_name, arg_names, instructions):
-        self.functions[function_name] = lambda *arg_values: self._let(zip(arg_names, arg_values), instructions)
+        def function(*arg_values):
+            values = [self.execute(a) if a.__class__ == List else a for a in arg_values]
+            var_defs = zip(arg_names, values)
+            return self._let(var_defs, instructions)
+        self.functions[function_name] = function
         return function_name
 
     def _write(self, arg, end='\n'):
