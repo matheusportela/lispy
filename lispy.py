@@ -73,8 +73,22 @@ class Lispy:
 
     def execute_script(self, filename):
         with open(filename) as fd:
-            string = fd.read()
-        self.eval(string)
+            string = fd.read().replace('\n', '')
+
+        buffer = []
+        open_parentheses = 0
+
+        for c in string:
+            if c == '(':
+                open_parentheses += 1
+            elif c == ')':
+                open_parentheses -= 1
+
+            buffer.append(c)
+
+            if open_parentheses == 0:
+                self.eval(''.join(buffer))
+                buffer = []
 
 
 class Type:
