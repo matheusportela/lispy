@@ -101,6 +101,16 @@ class TestLispy(unittest.TestCase):
     def test_concat_with_variables(self):
         self.assertEqual(self.lispy.eval('(let ((x "abc")) (concat x "def"))'), String('abcdef'))
 
+    def test_defun(self):
+        self.assertEqual(self.lispy.eval('(defun foo (x) (+ x 1))'), Symbol('foo'))
+        self.assertEqual(self.lispy.eval('(foo 2)'), 3)
+
+    def test_defun_does_not_leak_variables(self):
+        self.lispy.eval('(defun foo (x y) (- x y))')
+        self.assertEqual(self.lispy.eval('(foo 5 2)'), 3)
+        with self.assertRaises(Interpreter.UndefinedSymbolError):
+            self.lispy.eval('(+ x y)')
+
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):
         self.assertEqual(Nil(), None)

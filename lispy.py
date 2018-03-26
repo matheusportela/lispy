@@ -295,11 +295,16 @@ class Interpreter:
         self.global_variable_context = {}
         self.local_variable_contexts = []
 
-        self.functions = {
+        self.special_functions = {
             Symbol('quote'): self._quote,
-            Symbol('list'): self._list,
+            Symbol('defun'): self._defun,
+            Symbol('let'): self._let,
+            Symbol('progn'): self._progn,
             Symbol('set'): self._set,
             Symbol('get'): self._get,
+        }
+        self.regular_functions = {
+            Symbol('list'): self._list,
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,
             Symbol('-'): self._sub,
@@ -309,15 +314,14 @@ class Interpreter:
             Symbol('/'): self._div,
             Symbol('div'): self._div,
             Symbol('pow'): self._pow,
-            Symbol('let'): self._let,
             Symbol('write'): self._write,
             Symbol('read'): self._read,
-            Symbol('progn'): self._progn,
             Symbol('concat'): self._concat,
             Symbol('float'): self._float,
             Symbol('int'): self._int,
             Symbol('str'): self._str,
         }
+        self.functions = {**self.special_functions, **self.regular_functions}
 
     def execute(self, instruction):
         if instruction.__class__ in [Symbol, Integer, Float, String]:
@@ -330,7 +334,7 @@ class Interpreter:
             function_name = instruction[0]
             args = instruction[1:]
 
-            if function_name not in [Symbol('quote'), Symbol('let'), Symbol('progn'), Symbol('set'), Symbol('get')]:
+            if function_name in self.regular_functions:
                 args = self._evaluate_args(args)
 
             if function_name in self.functions:
@@ -456,8 +460,11 @@ class Interpreter:
 
         self._delete_local_variable_context()
 
-
         return result
+
+    def _defun(self, function_name, arg_names, instructions):
+        self.functions[function_name] = lambda *arg_values: self._let(zip(arg_names, arg_values), instructions)
+        return function_name
 
     def _write(self, arg, end='\n'):
         if end == Nil():
