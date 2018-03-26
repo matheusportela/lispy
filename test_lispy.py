@@ -13,6 +13,12 @@ class TestLispy(unittest.TestCase):
     def setUp(self):
         self.lispy = Lispy()
 
+    def test_t(self):
+        self.assertEqual(self.lispy.eval('t'), T())
+
+    def test_nil(self):
+        self.assertEqual(self.lispy.eval('nil'), Nil())
+
     def test_empty_list_returns_nil(self):
         self.assertEqual(self.lispy.eval('()'), Nil())
 
@@ -28,6 +34,24 @@ class TestLispy(unittest.TestCase):
     def test_list_evaluate_args(self):
         with self.assertRaises(Interpreter.UndefinedSymbolError):
             result = self.lispy.eval('(list 1 2 foo)')
+
+    def test_integers_are_equal(self):
+        self.assertEqual(self.lispy.eval('(= 1 1)'), T())
+
+    def test_floats_are_equal(self):
+        self.assertEqual(self.lispy.eval('(= 1.0 1.0)'), T())
+
+    def test_strings_are_equal(self):
+        self.assertEqual(self.lispy.eval('(= "abc" "abc")'), T())
+
+    def test_integers_are_different(self):
+        self.assertEqual(self.lispy.eval('(= 1 2)'), Nil())
+
+    def test_floats_are_different(self):
+        self.assertEqual(self.lispy.eval('(= 1.0 1.1)'), Nil())
+
+    def test_strings_are_different(self):
+        self.assertEqual(self.lispy.eval('(= "abc" "def")'), Nil())
 
     def test_sum_with_multiple_numbers(self):
         self.assertEqual(self.lispy.eval('(+ 1 2 3)'), 6)

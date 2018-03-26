@@ -112,6 +112,15 @@ class Nil(Type):
     def __repr__(self):
         return 'nil'
 
+
+class T(Type):
+    def __init__(self):
+        self.value = True
+
+    def __repr__(self):
+        return 't'
+
+
 class Integer(Type):
     def _assert_type(self, value):
         if type(value) != int:
@@ -256,8 +265,12 @@ class Parser:
     def __init__(self):
         self.type_parser = {
             'nil': {
-                'regex': '^(nil)$',
+                'regex': r'^(nil)$',
                 'parser': lambda x: Nil()
+            },
+            't': {
+                'regex': r'^(t)$',
+                'parser': lambda x: T()
             },
             'integer': {
                 'regex': r'^(-?\d+)$',
@@ -319,6 +332,7 @@ class Interpreter:
         }
         self.regular_functions = {
             Symbol('list'): self._list,
+            Symbol('='): self._equal,
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,
             Symbol('-'): self._sub,
@@ -347,6 +361,12 @@ class Interpreter:
         if instruction.__class__ == List:
             function_name = instruction[0]
             args = instruction[1:]
+
+            if function_name == Nil():
+                return Nil()
+
+            if function_name == T():
+                return T()
 
             if function_name in self.regular_functions:
                 args = self._evaluate_args(args)
@@ -415,7 +435,6 @@ class Interpreter:
         self.local_variable_contexts.pop(0)
 
     # Functions
-
     def _quote(self, arg):
         return arg
 
@@ -428,6 +447,9 @@ class Interpreter:
 
     def _get(self, name):
         return self._get_global_variable(name)
+
+    def _equal(self, x, y):
+        return T() if x == y else Nil()
 
     def _sum(self, *args):
         output_class = self._cast_arithmetic_values(args)
