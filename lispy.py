@@ -374,7 +374,8 @@ class Interpreter:
 
             if function_name in self.functions:
                 function = self.functions[function_name]
-                return function(*args)
+                result = function(*args)
+                return result if result != None else Nil()
 
         raise self.UndefinedFunctionError('Undefined function "{}"'.format(function_name))
 

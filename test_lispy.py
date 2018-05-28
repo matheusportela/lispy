@@ -81,7 +81,7 @@ class TestLispy(unittest.TestCase):
         self.assertEqual(self.lispy.eval('(quote (1 foo))'), [Integer(1), Symbol('foo')])
 
     def test_set_and_get_variable_values(self):
-        self.lispy.eval('(set *foo* 42)')
+        self.assertEqual(self.lispy.eval('(set *foo* 42)'), Nil())
         self.assertEqual(self.lispy.eval('(get *foo*)'), 42)
 
     def test_let_with_sum(self):
