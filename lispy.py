@@ -546,7 +546,7 @@ class Interpreter:
         return Float(float(arg.value))
 
     def _int(self, arg):
-        return Int(int(arg.value))
+        return Integer(int(float(arg.value)))
 
     def _str(self, arg):
         return String(str(arg.value))

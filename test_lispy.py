@@ -163,6 +163,24 @@ class TestLispy(unittest.TestCase):
     def test_if_without_else_false(self):
         self.assertEqual(self.lispy.eval('(if nil 1)'), Nil())
 
+    def test_float_type_casting_from_int(self):
+        self.assertEqual(self.lispy.eval('(float 10)'), 10.0)
+
+    def test_float_type_casting_from_str(self):
+        self.assertEqual(self.lispy.eval('(float "10")'), 10.0)
+
+    def test_int_type_casting_from_float(self):
+        self.assertEqual(self.lispy.eval('(int 10.5)'), 10)
+
+    def test_int_type_casting_from_str(self):
+        self.assertEqual(self.lispy.eval('(int "10.5")'), 10)
+
+    def test_str_type_casting_from_int(self):
+        self.assertEqual(self.lispy.eval('(str 10)'), '10')
+
+    def test_str_type_casting_from_float(self):
+        self.assertEqual(self.lispy.eval('(str 10.5)'), '10.5')
+
 
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):
