@@ -139,6 +139,31 @@ class TestLispy(unittest.TestCase):
         self.lispy.eval('(defun foo (x y) (+ x y))')
         self.assertEqual(self.lispy.eval('(foo (+ 2 3) (- 7 3))'), 9)
 
+    def test_if_condition_true(self):
+        self.assertEqual(self.lispy.eval('(if t 1 2)'), 1)
+
+    def test_if_condition_false(self):
+        self.assertEqual(self.lispy.eval('(if nil 1 2)'), 2)
+
+    def test_if_evaluate_condition_true(self):
+        self.assertEqual(self.lispy.eval('(if (= (+ 1 2) 3) 1 2)'), 1)
+
+    def test_if_evaluate_condition_false(self):
+        self.assertEqual(self.lispy.eval('(if (= (+ 1 2) 4) 1 2)'), 2)
+
+    def test_if_evaluate_true_result(self):
+        self.assertEqual(self.lispy.eval('(if t (+ 1 2) 0)'), 3)
+
+    def test_if_evaluate_false_result(self):
+        self.assertEqual(self.lispy.eval('(if nil 0 (+ 1 2))'), 3)
+
+    def test_if_without_else_true(self):
+        self.assertEqual(self.lispy.eval('(if t 1)'), 1)
+
+    def test_if_without_else_false(self):
+        self.assertEqual(self.lispy.eval('(if nil 1)'), Nil())
+
+
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):
         self.assertEqual(Nil(), None)

@@ -325,6 +325,7 @@ class Interpreter:
         self.special_functions = {
             Symbol('quote'): self._quote,
             Symbol('defun'): self._defun,
+            Symbol('if'): self._if,
             Symbol('let'): self._let,
             Symbol('progn'): self._progn,
             Symbol('set'): self._set,
@@ -434,6 +435,9 @@ class Interpreter:
     def _delete_local_variable_context(self):
         self.local_variable_contexts.pop(0)
 
+    def _evaluate_if_list(self, param):
+        return self.execute(param) if param.__class__ == List else param
+
     # Functions
     def _quote(self, arg):
         return arg
@@ -442,8 +446,7 @@ class Interpreter:
         return List(*args)
 
     def _set(self, name, value):
-        value = self.execute(value) if value.__class__ == List else value
-        self._set_global_variable(name, value)
+        self._set_global_variable(name, self._evaluate_if_list(value))
 
     def _get(self, name):
         return self._get_global_variable(name)
@@ -503,11 +506,21 @@ class Interpreter:
 
     def _defun(self, function_name, arg_names, instructions):
         def function(*arg_values):
-            values = [self.execute(a) if a.__class__ == List else a for a in arg_values]
+            values = [self._evaluate_if_list(a) for a in arg_values]
             var_defs = zip(arg_names, values)
             return self._let(var_defs, instructions)
         self.functions[function_name] = function
         return function_name
+
+    def _if(self, condition, true_expr, false_expr=Nil()):
+        condition_result = self._evaluate_if_list(condition)
+
+        if condition_result != Nil():
+            result = self._evaluate_if_list(true_expr)
+        else:
+            result = self._evaluate_if_list(false_expr)
+
+        return result
 
     def _write(self, arg, end='\n'):
         if end == Nil():
