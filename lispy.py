@@ -109,6 +109,9 @@ class Nil(Type):
     def __init__(self):
         self.value = None
 
+    def __bool__(self):
+        return False
+
     def __repr__(self):
         return 'nil'
 
@@ -159,11 +162,20 @@ class List(Type):
         self.value = list(elements)
 
     def __getitem__(self, i):
+        if i.__class__ == slice:
+            return List(*self.value[i])
+
         return self.value[i]
 
     def __setitem__(self, i, value):
         self._assert_type(value)
         self.value[i] = value
+
+    def __len__(self):
+        return len(self.value)
+
+    def __iter__(self):
+        return (v for v in self.value)
 
     def __repr__(self):
         return '(' + ' '.join([str(v) for v in self.value]) + ')'
@@ -333,6 +345,8 @@ class Interpreter:
         }
         self.regular_functions = {
             Symbol('list'): self._list,
+            Symbol('car'): self._car,
+            Symbol('cdr'): self._cdr,
             Symbol('='): self._equal,
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,
@@ -444,7 +458,25 @@ class Interpreter:
         return arg
 
     def _list(self, *args):
+        if not len(args):
+            return Nil()
         return List(*args)
+
+    def _car(self, l):
+        if l.__class__ == Nil or len(l) < 1:
+            return Nil()
+        return l[0]
+
+    def _cdr(self, l):
+        if l.__class__ == Nil:
+            return Nil()
+
+        result = l[1:]
+
+        if not len(result):
+            return Nil()
+
+        return result
 
     def _set(self, name, value):
         self._set_global_variable(name, self._evaluate_if_list(value))

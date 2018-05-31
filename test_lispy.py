@@ -23,7 +23,7 @@ class TestLispy(unittest.TestCase):
         self.assertEqual(self.lispy.eval('()'), Nil())
 
     def test_list_function_without_args(self):
-        self.assertEqual(self.lispy.eval('(list)'), [])
+        self.assertEqual(self.lispy.eval('(list)'), Nil())
 
     def test_list_function_with_one_arg(self):
         self.assertEqual(self.lispy.eval('(list 1)'), [1])
@@ -180,6 +180,42 @@ class TestLispy(unittest.TestCase):
 
     def test_str_type_casting_from_float(self):
         self.assertEqual(self.lispy.eval('(str 10.5)'), '10.5')
+
+    def test_car_with_more_than_two_values(self):
+        self.assertEqual(self.lispy.eval('(car (list 1 2 3 4 5))'), 1)
+
+    def test_car_with_two_values(self):
+        self.assertEqual(self.lispy.eval('(car (list 1 2))'), 1)
+
+    def test_car_with_one_value(self):
+        self.assertEqual(self.lispy.eval('(car (list 1))'), 1)
+
+    def test_car_without_values(self):
+        self.assertEqual(self.lispy.eval('(car (list))'), Nil())
+
+    def test_car_with_nil(self):
+        self.assertEqual(self.lispy.eval('(car ())'), Nil())
+
+    def test_car_with_nil2(self):
+        self.assertEqual(self.lispy.eval('(car nil)'), Nil())
+
+    def test_cdr_returns_list(self):
+        self.assertEqual(self.lispy.eval('(cdr (list 1 2))').__class__, List)
+
+    def test_cdr_with_more_than_two_values(self):
+        self.assertEqual(self.lispy.eval('(cdr (list 1 2 3 4 5))'), [2, 3, 4, 5])
+
+    def test_cdr_with_two_values(self):
+        self.assertEqual(self.lispy.eval('(cdr (list 1 2))'), [2])
+
+    def test_cdr_with_one_value(self):
+        self.assertEqual(self.lispy.eval('(cdr (list 1))'), Nil())
+
+    def test_cdr_without_values(self):
+        self.assertEqual(self.lispy.eval('(cdr (list))'), Nil())
+
+    def test_cdr_with_nil(self):
+        self.assertEqual(self.lispy.eval('(cdr nil)'), Nil())
 
 
 class TestTypes(unittest.TestCase):

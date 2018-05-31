@@ -82,6 +82,34 @@ What's your name?
 nil
 ```
 
+`car`: Return first value of a list or `nil`
+```lisp
+>>> (car (1 2 3))
+1
+>>> (car (1 2))
+1
+>>> (car (1))
+1
+>>> (car ())
+nil
+>>> (car nil)
+nil
+```
+
+`cdr`: Return tail of list or `nil`
+```lisp
+>>> (cdr (1 2 3))
+(2 3)
+>>> (cdr (1 2))
+(2)
+>>> (cdr (1))
+nil
+>>> (cdr ())
+nil
+>>> (cdr nil)
+nil
+```
+
 `set`: Set value to global variable
 ```lisp
 >>> (set (quote *foo*) 42)
