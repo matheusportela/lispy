@@ -110,6 +110,16 @@ nil
 nil
 ```
 
+`cons`: Append element to given list
+```lisp
+>>> (cons 1 nil)
+(1)
+>>> (cons 1 (list 2 3))
+(1 2 3)
+>>> (cons 1 (cons 2 (cons 3 nil)))
+(1 2 3)
+```
+
 `set`: Set value to global variable
 ```lisp
 >>> (set (quote *foo*) 42)

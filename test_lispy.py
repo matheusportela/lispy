@@ -217,6 +217,18 @@ class TestLispy(unittest.TestCase):
     def test_cdr_with_nil(self):
         self.assertEqual(self.lispy.eval('(cdr nil)'), Nil())
 
+    def test_cons_with_value_and_list(self):
+        self.assertEqual(self.lispy.eval('(cons 1 (list 2 3))'), [1, 2, 3])
+
+    def test_cons_with_list_and_list(self):
+        self.assertEqual(self.lispy.eval('(cons (list 1 2) (list 3 4))'), [[1, 2], 3, 4])
+
+    def test_cons_with_value_and_nil(self):
+        self.assertEqual(self.lispy.eval('(cons 1 ())'), [1])
+
+    def test_nested_cons(self):
+        self.assertEqual(self.lispy.eval('(cons 1 (cons 2 (cons 3 nil)))'), [1, 2, 3])
+
 
 class TestTypes(unittest.TestCase):
     def test_nil_value(self):

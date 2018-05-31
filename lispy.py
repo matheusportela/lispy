@@ -347,6 +347,7 @@ class Interpreter:
             Symbol('list'): self._list,
             Symbol('car'): self._car,
             Symbol('cdr'): self._cdr,
+            Symbol('cons'): self._cons,
             Symbol('='): self._equal,
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,
@@ -477,6 +478,11 @@ class Interpreter:
             return Nil()
 
         return result
+
+    def _cons(self, value, list):
+        if not list:
+            return List(value)
+        return List(value, *list)
 
     def _set(self, name, value):
         self._set_global_variable(name, self._evaluate_if_list(value))
