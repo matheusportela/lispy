@@ -348,6 +348,7 @@ class Interpreter:
             Symbol('car'): self._car,
             Symbol('cdr'): self._cdr,
             Symbol('cons'): self._cons,
+            Symbol('eq'): self._equal,
             Symbol('='): self._equal,
             Symbol('+'): self._sum,
             Symbol('sum'): self._sum,

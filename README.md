@@ -142,7 +142,7 @@ nil
 (1 2 7)
 ```
 
-`=`: Verify whether two elements are equivalents
+`=` or `eq`: Verify whether two elements are equivalents
 ```lisp
 >>> (= 1 1)
 t
