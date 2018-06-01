@@ -171,6 +171,9 @@ class TestLispy(unittest.TestCase):
     def test_if_without_else_false(self):
         self.assertEqual(self.lispy.eval('(if nil 1)'), Nil())
 
+    def test_if_with_parameter_evaluation(self):
+        self.assertEqual(self.lispy.eval('(let ((x 1)) (if t x 2))'), 1)
+
     def test_float_type_casting_from_int(self):
         self.assertEqual(self.lispy.eval('(float 10)'), 10.0)
 

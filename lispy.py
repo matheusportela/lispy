@@ -559,9 +559,9 @@ class Interpreter:
         condition_result = self._evaluate_if_list(condition)
 
         if condition_result != Nil():
-            result = self._evaluate_if_list(true_expr)
+            result = self._evaluate_element(true_expr)
         else:
-            result = self._evaluate_if_list(false_expr)
+            result = self._evaluate_element(false_expr)
 
         return result
 
