@@ -345,6 +345,7 @@ class Interpreter:
         }
         self.regular_functions = {
             Symbol('list'): self._list,
+            Symbol('atom'): self._atom,
             Symbol('car'): self._car,
             Symbol('cdr'): self._cdr,
             Symbol('cons'): self._cons,
@@ -463,6 +464,11 @@ class Interpreter:
         if not len(args):
             return Nil()
         return List(*args)
+
+    def _atom(self, value):
+        if value.__class__ == List:
+            return Nil()
+        return T()
 
     def _car(self, l):
         if l.__class__ == Nil or len(l) < 1:

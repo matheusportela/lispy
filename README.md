@@ -82,6 +82,22 @@ What's your name?
 nil
 ```
 
+`atom`: Return true for all values except lists
+```lisp
+>>> (atom nil)
+t
+>>> (atom t)
+t
+>>> (atom 1)
+t
+>>> (atom 1.5)
+t
+>>> (atom "abc")
+t
+>>> (atom (list 1 2 3))
+nil
+```
+
 `car`: Return first value of a list or `nil`
 ```lisp
 >>> (car (1 2 3))

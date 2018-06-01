@@ -181,6 +181,24 @@ class TestLispy(unittest.TestCase):
     def test_str_type_casting_from_float(self):
         self.assertEqual(self.lispy.eval('(str 10.5)'), '10.5')
 
+    def test_atom_nil(self):
+        self.assertEqual(self.lispy.eval('(atom nil)'), T())
+
+    def test_atom_true(self):
+        self.assertEqual(self.lispy.eval('(atom t)'), T())
+
+    def test_atom_integer(self):
+        self.assertEqual(self.lispy.eval('(atom 1)'), T())
+
+    def test_atom_float(self):
+        self.assertEqual(self.lispy.eval('(atom 1.5)'), T())
+
+    def test_atom_string(self):
+        self.assertEqual(self.lispy.eval('(atom "abc")'), T())
+
+    def test_atom_list(self):
+        self.assertEqual(self.lispy.eval('(atom (list 1 2 3))'), Nil())
+
     def test_car_with_more_than_two_values(self):
         self.assertEqual(self.lispy.eval('(car (list 1 2 3 4 5))'), 1)
 
