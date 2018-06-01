@@ -577,7 +577,7 @@ class Interpreter:
     def _progn(self, *instructions):
         result = Nil()
         for instruction in instructions:
-            result = self.execute(instruction)
+            result = self._evaluate_element(instruction)
 
         return result
 
