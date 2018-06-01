@@ -387,7 +387,7 @@ class Interpreter:
                 return T()
 
             if function_name in self.regular_functions:
-                args = self._evaluate_args(args)
+                args = self._evaluate_elements(args)
 
             if function_name in self.functions:
                 function = self.functions[function_name]
@@ -396,18 +396,16 @@ class Interpreter:
 
         raise self.UndefinedFunctionError('Undefined function "{}"'.format(function_name))
 
-    def _evaluate_args(self, args):
-        result = []
+    def _evaluate_elements(self, elements):
+        return [self._evaluate_element(element) for element in elements]
 
-        for arg in args:
-            if arg.__class__ == List:
-                arg = self.execute(arg)
-            elif arg.__class__ == Symbol:
-                arg = self._get_variable(arg) if self._is_variable(arg) else self.execute(arg)
-
-            result.append(arg)
-
-        return result
+    def _evaluate_element(self, element):
+        if element.__class__ == List:
+            return self.execute(element)
+        elif element.__class__ == Symbol:
+            return self._get_variable(element) if self._is_variable(element) else self.execute(element)
+        else:
+            return element
 
     def _get_variable(self, name):
         local_variable_context = self._find_local_variable_context(name)
@@ -544,8 +542,7 @@ class Interpreter:
 
         result = Nil()
         for instruction in instructions:
-            result = self.execute(instruction)
-
+            result = self._evaluate_element(instruction)
         self._delete_local_variable_context()
 
         return result
@@ -553,7 +550,7 @@ class Interpreter:
     def _defun(self, function_name, arg_names, instructions):
         def function(*arg_values):
             values = [self._evaluate_if_list(a) for a in arg_values]
-            var_defs = zip(arg_names, values)
+            var_defs = zip(arg_names, values) if arg_names else []
             return self._let(var_defs, instructions)
         self.functions[function_name] = function
         return function_name

@@ -125,7 +125,15 @@ class TestLispy(unittest.TestCase):
     def test_concat_with_variables(self):
         self.assertEqual(self.lispy.eval('(let ((x "abc")) (concat x "def"))'), String('abcdef'))
 
-    def test_defun(self):
+    def test_defun_return_atom(self):
+        self.assertEqual(self.lispy.eval('(defun foo () 1)'), Symbol('foo'))
+        self.assertEqual(self.lispy.eval('(foo)'), 1)
+
+    def test_defun_return_variable(self):
+        self.assertEqual(self.lispy.eval('(defun foo (x) x)'), Symbol('foo'))
+        self.assertEqual(self.lispy.eval('(foo 2)'), 2)
+
+    def test_defun_evaluate_expression(self):
         self.assertEqual(self.lispy.eval('(defun foo (x) (+ x 1))'), Symbol('foo'))
         self.assertEqual(self.lispy.eval('(foo 2)'), 3)
 
